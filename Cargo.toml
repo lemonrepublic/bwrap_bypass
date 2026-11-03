@@ -1,0 +1,19 @@
+[package]
+name = "bwrap_bypass"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "bwrap_bypass"
+crate-type = ["cdylib"]
+
+[[bin]]
+name = "fake_bwrap"
+path = "src/bin/fake_bwrap.rs"
+
+[[bin]]
+name = "wrapper"
+path = "src/bin/wrapper.rs"
+
+[dependencies]
+libc = "0.2"

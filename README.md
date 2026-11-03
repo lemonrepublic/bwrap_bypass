@@ -1,45 +1,59 @@
-Bwrap Bypass Ecosystem
-A Rust-based toolkit to bypass bubblewrap (bwrap) sandbox constraints in unprivileged PRoot, Android Termux, and container environments where CLONE_NEWUSER namespaces are restricted.
-Architecture
-    • libbwrap_bypass.so: A dynamic library (LD_PRELOAD) hook targeting execve to intercept and rewrite sandbox calls.
-    • fake_bwrap: A drop-in binary override utility that strips out unsupported sandbox arguments and passes through the underlying executable payload.
-    • flatpak-wrapper: A CLI launcher that automatically injects the LD_PRELOAD environment variable to run desktop applications smoothly.
+bwrap_bypass
+bwrap_bypass is a lightweight ecosystem designed to intercept, wrap, and bypass bwrap (Bubblewrap) restrictions on Linux distributions like Void Linux. This repository provides preloaded libraries and wrapper binaries to ensure seamless application execution (such as Flatpak packages) in restricted environments.
 
-Prerequisites: Installing Cargo & Rust
-Before building the project, ensure you have the Rust toolchain (cargo and rustc) installed on your Linux distribution using your package manager:
-Debian / Ubuntu / Linux Mint
-sudo apt update
-sudo apt install cargo rustc build-essential
-Arch Linux / Manjaro
-sudo pacman -S rust base-devel
-Void Linux
-sudo xbps-install -S rust base-devel cargo
-Fedora / RHEL / CentOS
-sudo dnf install cargo rustc make gcc
-openSUSE Leap / Tumbleweed
-sudo zypper install rust cargo make gcc
-Gentoo Linux
-sudo emerge --ask dev-lang/rust sys-devel/make sys-devel/gcc
-Slackware
-slackpkg update
-slackpkg install rust
-Universal Method (Rustup - Recommended)
-If your distribution's packaged version is outdated, you can install the official toolchain universally:
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source "$HOME/.cargo/env"
+Features
+Dynamic Interception (libbwrap_bypass.so): Uses LD_PRELOAD and RTLD_NEXT to hook system calls and redirect calls dynamically.
 
-How to Build and Install
-Once cargo is installed, compile the release binaries and install them into your system path:
-# 1. Navigate to your repository directory
+Custom Wrapper (fake_bwrap): Acts as a drop-in replacement for bubblewrap, forwarding arguments safely to the real /usr/bin/bwrap.
+
+Flatpak Integration (flatpak-wrapper): Streamlines launching sandboxed desktop applications like GNOME Calculator under the custom bypass layer.
+
+Installation
+Prerequisites
+Rust and Cargo
+
+GCC / Clang / build-essentials
+
+Bubblewrap (bwrap) version 0.13.1 or compatible
+
+Building from Source
+Clone the repository:
+
+Bash
+git clone https://github.com/lemonrepublic/bwrap_bypass.git
 cd bwrap_bypass
+Build the project using Cargo:
 
-# 2. Build release binaries and dynamic library
+Bash
 cargo build --release
+Install binaries and libraries to your system paths:
 
-# 3. Install binaries and libraries to system paths (requires root/sudo)
-sudo make install
-Verification
-Verify that the ecosystem components were successfully installed:
-ls -lh /usr/local/lib/libbwrap_bypass.so
-which fake_bwrap
-which flatpak-wrapper
+Bash
+sudo cp target/release/libbwrap_bypass.so /usr/local/lib/
+sudo cp target/release/fake_bwrap /usr/local/bin/
+sudo cp scripts/flatpak-wrapper /usr/local/bin/
+Usage
+To run applications with the bypass layer active, use the provided wrapper script:
+
+Bash
+flatpak-wrapper run org.gnome.Calculator
+Manual Environment Preloading
+You can also manually preload the bypass library into any target command:
+
+Bash
+LD_PRELOAD=/usr/local/lib/libbwrap_bypass.so flatpak run org.gnome.Calculator
+Troubleshooting & Debugging
+You can use GDB to trace and inspect how the wrapper handles process spawns and system calls:
+
+Bash
+gdb --args flatpak-wrapper run org.gnome.Calculator
+Inside GDB:
+
+Code snippet
+set follow-fork-mode child
+set detach-on-fork off
+set environment LD_PRELOAD=/usr/local/lib/libbwrap_bypass.so
+break execve
+run
+Contributing
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.

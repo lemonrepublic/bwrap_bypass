@@ -1,0 +1,10 @@
+[bypass]
+target_bwrap = "/usr/bin/bwrap"
+enable_sanitization = true
+
+[binds]
+read_only = [
+    "/usr/share/fonts",
+    "/etc/fonts"
+]
+read_write = []

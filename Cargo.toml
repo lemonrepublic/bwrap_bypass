@@ -5,15 +5,16 @@ edition = "2021"
 
 [lib]
 name = "bwrap_bypass"
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+libc = "0.2"
+
+[dev-dependencies]
+tempfile = "3.8"
 
 [[bin]]
 name = "fake_bwrap"
 path = "src/bin/fake_bwrap.rs"
-
-[[bin]]
-name = "wrapper"
-path = "src/bin/wrapper.rs"
-
-[dependencies]
-libc = "0.2"
